@@ -1,0 +1,55 @@
+name: Test Hello World COBOL Program
+
+# Trigger workflow on push to main and pull requests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-cobol:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Checkout the repository code
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    # Install GnuCOBOL compiler
+    - name: Install GnuCOBOL
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gnucobol
+    
+    # Verify COBOL compiler installation
+    - name: Verify COBOL installation
+      run: |
+        cobc --version
+    
+    # Compile the COBOL program
+    - name: Compile Hello World program
+      run: |
+        cobc -x hello.cob -o hello
+    
+    # Run the program and capture output
+    - name: Run Hello World program
+      run: |
+        ./hello > output.txt
+        cat output.txt
+    
+    # Verify the output matches expected result
+    - name: Verify output
+      run: |
+        expected="Hello, World!"
+        actual=$(cat output.txt)
+        if [ "$actual" = "$expected" ]; then
+          echo "✅ Test passed: Output matches expected result"
+          echo "Expected: $expected"
+          echo "Actual: $actual"
+        else
+          echo "❌ Test failed: Output does not match expected result"
+          echo "Expected: $expected"
+          echo "Actual: $actual"
+          exit 1
+        fi
